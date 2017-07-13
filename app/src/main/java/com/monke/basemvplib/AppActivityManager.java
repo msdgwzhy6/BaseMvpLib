@@ -2,6 +2,7 @@ package com.monke.basemvplib;
 
 import android.app.Activity;
 
+import com.monke.basemvplib.impl.BaseActivity;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -57,7 +58,7 @@ public class AppActivityManager {
     /*
     移除Activity
      */
-    public void remove(Class<Activity> activityClass){
+    public void remove(Class<?> activityClass){
         for(Iterator<WeakReference<Activity>> iterator = activities.iterator();iterator.hasNext();){
             WeakReference<Activity> item = iterator.next();
             if(null != item && null != item.get() && item.get().getClass() == activityClass){
@@ -69,7 +70,7 @@ public class AppActivityManager {
     /*
     关闭指定 activity
      */
-    public void finishActivity(Activity... activities){
+    public void finishActivity(BaseActivity... activities){
         for(int i=0;i<activities.length;i++){
             if(null != activities[i]){
                 activities[i].finish();
@@ -80,7 +81,7 @@ public class AppActivityManager {
     /*
     关闭指定 activity(class)
      */
-    public void finishActivity(Class<Activity>... activityClasses){
+    public void finishActivity(Class<?>... activityClasses){
         ArrayList<WeakReference<Activity>> waitfinish = new ArrayList<>();
         for(WeakReference<Activity> temp :activities){
             for(int i=0;i<activityClasses.length;i++){
@@ -95,5 +96,20 @@ public class AppActivityManager {
                 activityWeakReference.get().finish();
             }
         }
+    }
+
+    /*
+    判断指定Activity是否存在
+     */
+    public Boolean isExist(Class<?> activityClass){
+        Boolean result = false;
+        for(Iterator<WeakReference<Activity>> iterator = activities.iterator();iterator.hasNext();){
+            WeakReference<Activity> item = iterator.next();
+            if(null != item && null != item.get() && item.get().getClass() == activityClass){
+                result = true;
+                break;
+            }
+        }
+        return result;
     }
 }

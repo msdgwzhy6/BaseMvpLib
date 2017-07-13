@@ -1,14 +1,20 @@
 package com.monke.basemvplib.impl;
 
+import android.app.ActivityOptions;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.view.View;
 import com.monke.basemvplib.AppActivityManager;
 import com.monke.basemvplib.IPresenter;
 import com.monke.basemvplib.IView;
 import com.trello.rxlifecycle2.components.support.RxAppCompatActivity;
 
-public abstract class BaseActivity<T extends IPresenter> extends RxAppCompatActivity implements IView{
+public abstract class BaseActivity<T extends IPresenter> extends RxAppCompatActivity implements IView {
     protected Bundle savedInstanceState;
-    private T mPresenter;
+    protected T mPresenter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,7 +34,7 @@ public abstract class BaseActivity<T extends IPresenter> extends RxAppCompatActi
     /**
      * 首次逻辑操作
      */
-    protected void firstRequest(){
+    protected void firstRequest() {
 
     }
 
@@ -50,7 +56,7 @@ public abstract class BaseActivity<T extends IPresenter> extends RxAppCompatActi
      * P层绑定V层
      */
     private void attachView() {
-        if(null != mPresenter){
+        if (null != mPresenter) {
             mPresenter.attachView(this);
         }
     }
@@ -58,8 +64,8 @@ public abstract class BaseActivity<T extends IPresenter> extends RxAppCompatActi
     /**
      * P层解绑V层
      */
-    private void detachView(){
-        if(null != mPresenter){
+    private void detachView() {
+        if (null != mPresenter) {
             mPresenter.detachView();
         }
     }
@@ -67,12 +73,13 @@ public abstract class BaseActivity<T extends IPresenter> extends RxAppCompatActi
     /**
      * SDK初始化
      */
-    protected void initSDK(){
+    protected void initSDK() {
 
     }
 
     /**
      * P层绑定   若无则返回null;
+     *
      * @return
      */
     protected abstract T initInjector();
@@ -86,6 +93,7 @@ public abstract class BaseActivity<T extends IPresenter> extends RxAppCompatActi
      * 数据初始化
      */
     protected abstract void initData();
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -96,5 +104,37 @@ public abstract class BaseActivity<T extends IPresenter> extends RxAppCompatActi
         super.onDestroy();
         detachView();
         AppActivityManager.getInstance().remove(this);
+    }
+
+    ////////////////////////////////启动Activity转场动画/////////////////////////////////////////////
+
+    protected void startActivityForResultByAnim(Intent intent, int requestCode, int animIn, int animExit) {
+        startActivityForResult(intent, requestCode);
+        overridePendingTransition(animIn, animExit);
+    }
+
+    protected void startActivityByAnim(Intent intent, int animIn, int animExit) {
+        startActivity(intent);
+        overridePendingTransition(animIn, animExit);
+    }
+
+    protected void startActivityForResultByAnim(Intent intent, int requestCode, @NonNull View view, @NonNull String transitionName, int animIn, int animExit) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            startActivityForResult(intent, requestCode, ActivityOptions.makeSceneTransitionAnimation(this, view, transitionName).toBundle());
+        } else {
+            startActivityForResultByAnim(intent, requestCode, animIn, animExit);
+        }
+    }
+
+    protected void startActivityByAnim(Intent intent, @NonNull View view, @NonNull String transitionName, int animIn, int animExit) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(this, view, transitionName).toBundle());
+        } else {
+            startActivityByAnim(intent, animIn, animExit);
+        }
+    }
+
+    public Context getContext(){
+        return this;
     }
 }
